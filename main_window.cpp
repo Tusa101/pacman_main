@@ -1,17 +1,16 @@
 #include <SFML/Graphics.hpp>
-#include <time.h>
-#include "map_characteristics.h"
 #include "pacman_character.h"
+#include "entity_new.h"
 using namespace sf;
 
-std::vector<Entity> MapConstructor(const std::vector<std::string>& map,const Texture& texture, sf::RenderWindow& window, const int& width);
+std::vector<Entity> MapConstructor(const std::vector<std::string>& map,const Texture* texture, sf::RenderWindow& window, const int& width);
 static const int Height = 22;
 static const int Width = 25;
-
+static int coll_check = -1;
 int main()
 {
 
-	RenderWindow window(VideoMode(Width * 32, Height * 32), "Pacman");
+	RenderWindow window(VideoMode(Width * 32 + 10, Height * 32), "Pacman");
 	std::vector<std::string> map = {
 
 		"6777777777778777777777774",
@@ -52,13 +51,9 @@ int main()
 
 	float start_x = 12 * 32, start_y = 16 * 32;
 
-
-	Pacman pacman = Pacman(texture_pacman_right, start_x, start_y);
+	Pacman pacman = Pacman(&texture_pacman_right, { start_x, start_y });
 	
-	Sprite sprite_pacman_right(texture_pacman_right);
-	Sprite sprite_pacman_left(texture_pacman_left);
-	Sprite sprite_pacman_up(texture_pacman_up);
-	Sprite sprite_pacman_down(texture_pacman_down);
+
 	while (window.isOpen())
 	{		
 		Event event;
@@ -68,7 +63,7 @@ int main()
 			{
 				window.close();
 			}
-			/*if (event.type == Event::KeyPressed)
+			if (event.type == Event::KeyPressed)
 			{
 				if (event.key.code == Keyboard::Escape)
 				{
@@ -90,344 +85,121 @@ int main()
 				{
 					direction = 3;
 				}
-			}*/
+			}
 		}
 		
 		/////////// Drawing map ////////////////
 		window.clear(Color::Black);
-		auto wall_coords = MapConstructor(map, texture_map, window, Width);
-
-		Collision collision1 = pacman.GetCollision();
+		
+		Collision collision = pacman.GetCollision();
+		auto wall_coords = MapConstructor(map, &texture_map, window, Width);
+		sf::Vector2f coll_coords = {};
+		int collision_cell = -1;
 		for (auto it = wall_coords.begin(); it < wall_coords.end(); ++it)
 		{
-			if ((*it).GetCoords().GetY() == pacman.GetCoords().GetY() + 32 && (*it).GetCoords().GetX() <= pacman.GetCoords().GetX()&& 32+ (*it).GetCoords().GetX() >= pacman.GetCoords().GetX()&& (*it).IsWall())
+			if ((*it).GetType()!='.'&& (*it).GetType() != 'o' && (*it).GetType() != ' ')
 			{
-				obstacles[3] = -1;
-				continue;
+				if ((*it).GetCollision().CheckCollision(collision, 1.0f))
+				{
+					coll_coords = { (*it).GetPosition().x, (*it).GetPosition().y };
+				}
 			}
-			if ((*it).GetCoords().GetY() == pacman.GetCoords().GetY() - 32 && (*it).GetCoords().GetX() <= pacman.GetCoords().GetX() && 32 + (*it).GetCoords().GetX() >= pacman.GetCoords().GetX() && (*it).IsWall())
-			{
-				obstacles[2] = -1;
-				continue;
-			}
-			if ((*it).GetCoords().GetX() == pacman.GetCoords().GetX() + 32 && (*it).GetCoords().GetY() <= pacman.GetCoords().GetY() && 32 + (*it).GetCoords().GetY() >= pacman.GetCoords().GetY() && (*it).IsWall())
-			{
-				obstacles[0] = -1;
-				continue;
-			}
-			if ((*it).GetCoords().GetX() == pacman.GetCoords().GetX() - 32 && (*it).GetCoords().GetY() <= pacman.GetCoords().GetY() && 32 + (*it).GetCoords().GetY() >= pacman.GetCoords().GetY() && (*it).IsWall())
-			{
-				obstacles[1] = -1;
-			}
+			
+			
 		}
-
-
-
-		Event event1;
-		int cnt = 0;
-		while (window.pollEvent(event1))
+		if(coll_coords.x == pacman.GetPosition().x+32 && coll_coords.y <= pacman.GetPosition().y && 32 + coll_coords.y >= pacman.GetPosition().y)
 		{
-			
-			for (int i = 0; i < 4; ++i)
-			{
-				if (obstacles[i]==-1)
-				{
-					cnt++;
-				}
-			}
-			if(cnt == 2)
-			{
-				if (obstacles[0] == -1 && obstacles[1] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Down)
-						{
-							direction = 3;
-						}
-						if (event1.key.code == Keyboard::Up)
-						{
-							direction = 2;
-						}
-						if (event1.key.code == Keyboard::Left)
-						{
-							direction = -1;
-						}
-						if (event1.key.code == Keyboard::Right)
-						{
-							direction = -1;
-						}
-						break;
-					}
-				}
-
-
-				if (obstacles[0] == -1 && obstacles[2] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Left)
-						{
-							direction = 1;
-						}
-						if (event1.key.code == Keyboard::Down)
-						{
-							direction = 3;
-						}
-						if (event1.key.code == Keyboard::Up)
-						{
-							direction = -1;
-						}
-						if (event1.key.code == Keyboard::Right)
-						{
-							direction = -1;
-						}
-						break;
-					}
-				}
-				if (obstacles[0] == -1 && obstacles[3] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Left)
-						{
-							direction = 1;
-						}
-						if (event1.key.code == Keyboard::Up)
-						{
-							direction = 2;
-						}
-						if (event1.key.code == Keyboard::Right)
-						{
-							direction = -1;
-						}
-						if (event1.key.code == Keyboard::Down)
-						{
-							direction = -1;
-						}
-						break;
-					}
-				}
-				if (obstacles[1] == -1 && obstacles[2] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Down)
-						{
-							direction = 3;
-						}
-						if (event1.key.code == Keyboard::Right)
-						{
-							direction = 0;
-						}
-						if (event1.key.code == Keyboard::Up)
-						{
-							direction = -1;
-						}
-						if (event1.key.code == Keyboard::Left)
-						{
-							direction = -1;
-						}
-						break;
-					}
-				}
-				if (obstacles[1] == -1 && obstacles[3] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Up)
-						{
-							direction = 2;
-						}
-						if (event1.key.code == Keyboard::Right)
-						{
-							direction = 0;
-						}
-						if (event1.key.code == Keyboard::Left)
-						{
-							direction = -1;
-						}
-						if (event1.key.code == Keyboard::Down)
-						{
-							direction = -1;
-						}
-						break;
-					}
-				}
-				if (obstacles[2] == -1 && obstacles[3] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Left)
-						{
-							direction = 1;
-						}
-						if (event1.key.code == Keyboard::Right)
-						{
-							direction = 0;
-						}
-						if (event1.key.code == Keyboard::Up)
-						{
-							direction = -1;
-						}
-						if (event1.key.code == Keyboard::Down)
-						{
-							direction = -1;
-						}
-						break;
-					}
-
-				}
-				
-			}
-			
-			if (cnt == 1)
-			{
-				if (obstacles[0] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Left)
-						{
-							direction = 1;
-						}
-						if (event1.key.code == Keyboard::Right || direction == 0)
-						{
-							direction = -1;
-						}
-						if (event1.key.code == Keyboard::Up)
-						{
-							direction = 2;
-						}
-						if (event1.key.code == Keyboard::Down)
-						{
-							direction = 3;
-						}
-						break;
-					}
-				}
-				if (obstacles[1] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Left || direction == 1)
-						{
-							direction = -1;
-						}
-						if (event1.key.code == Keyboard::Right)
-						{
-							direction = 0;
-						}
-						if (event1.key.code == Keyboard::Up)
-						{
-							direction = 2;
-						}
-						if (event1.key.code == Keyboard::Down)
-						{
-							direction = 3;
-						}
-						break;
-					}
-				}
-				if (obstacles[2] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Left)
-						{
-							direction = 1;
-						}
-						if (event1.key.code == Keyboard::Right)
-						{
-							direction = 0;
-						}
-						if (event1.key.code == Keyboard::Up || direction == 2)
-						{
-							direction = -1;
-						}
-						if (event1.key.code == Keyboard::Down)
-						{
-							direction = 3;
-						}
-						break;
-					}
-				}
-				if (obstacles[3] == -1)
-				{
-					if (event1.type == event1.KeyPressed)
-					{
-						if (event1.key.code == Keyboard::Left)
-						{
-							direction = 1;
-						}
-						if (event1.key.code == Keyboard::Right)
-						{
-							direction = 0;
-						}
-						if (event1.key.code == Keyboard::Up)
-						{
-							direction = 2;
-						}
-						if (event1.key.code == Keyboard::Down || direction == 3)
-						{
-							direction = -1;
-						}
-						break;
-					}
-				}
-			}
-			obstacles[0] = 0;
-			obstacles[1] = 0;
-			obstacles[2] = 0;
-			obstacles[3] = 0;
-			cnt = 0;
-			
+			collision_cell = 0;
 		}
-		
-	
-		
-		
+		if (coll_coords.x == pacman.GetPosition().x + 32 && coll_coords.y - 32 <= pacman.GetPosition().y &&  coll_coords.y >= pacman.GetPosition().y)
+		{
+			collision_cell = 0;
+		}
+
+		if (coll_coords.x == pacman.GetPosition().x -32&& coll_coords.y <= pacman.GetPosition().y && 32 + coll_coords.y >= pacman.GetPosition().y)
+		{
+			collision_cell = 1;
+		}
+		if (coll_coords.x == pacman.GetPosition().x - 32 && coll_coords.y <= pacman.GetPosition().y -32 &&  coll_coords.y >= pacman.GetPosition().y)
+		{
+			collision_cell = 1;
+		}
+
+		if (coll_coords.x <= pacman.GetPosition().x && 32 + coll_coords.x >= pacman.GetPosition().x && coll_coords.y == pacman.GetPosition().y + 32)
+		{
+			collision_cell = 3;
+		}
+		if (coll_coords.x - 32 <= pacman.GetPosition().x && coll_coords.x >= pacman.GetPosition().x && coll_coords.y == pacman.GetPosition().y + 32)
+		{
+			collision_cell = 3;
+		}
+		if (coll_coords.x <= pacman.GetPosition().x && 32 + coll_coords.x >= pacman.GetPosition().x && coll_coords.y == pacman.GetPosition().y - 32)
+		{
+			collision_cell = 2;
+		}
+		if (coll_coords.x -32 <= pacman.GetPosition().x &&  coll_coords.x >= pacman.GetPosition().x && coll_coords.y == pacman.GetPosition().y - 32)
+		{
+			collision_cell = 2;
+		}
 		///////////////////////Drawing pacman movement //////////////////
-			
 		
-		
-
-		float velocity = 0.1f;
-		switch (direction)
+		for (auto it = wall_coords.begin(); it < wall_coords.end(); ++it)
 		{
-		case 0:
-		{
-
-			pacman = pacman + Point(velocity, 0);
-			pacman.SetSprite(sprite_pacman_right);
-			pacman.SetEntity(window);
-		}break;
-		case 1:
-		{
-			pacman = pacman + Point(-velocity, 0);
-			pacman.SetSprite(sprite_pacman_left);
-			pacman.SetEntity(window);
-		}break;
-		case 2:
-		{
-			pacman = pacman + Point(0, -velocity);
-			pacman.SetSprite(sprite_pacman_up);
-			pacman.SetEntity(window);
-		}break;
-		case 3:
-		{
-			pacman = pacman + Point(0, velocity);
-			pacman.SetSprite(sprite_pacman_down);
-			pacman.SetEntity(window);
-		}break;
-		default:
-		{
-			pacman.SetSprite(sprite_pacman_right);
-			pacman.SetEntity(window);
-		}break;
+			(*it).Draw(window);
 		}
+
 		
-		
+		float velocity = 1.3f;
+		if(direction == 0)
+		{
+			if (collision_cell != 0)
+			{
+				pacman.SetPosition({ velocity, 0 });
+			}
+			pacman.ChangeTexture(&texture_pacman_right);
+			pacman.Draw(window);
+		}
+		if (direction == 1)
+		{
+			if (collision_cell != 1)
+			{
+				pacman.SetPosition({ -velocity, 0 });
+
+			}
+			pacman.ChangeTexture(&texture_pacman_left);
+			pacman.Draw(window);
+		}
+		if (direction == 2)
+		{
+			if (collision_cell != 2)
+			{
+				pacman.SetPosition({ 0, -velocity });
+			}
+			pacman.ChangeTexture(&texture_pacman_up);
+			pacman.Draw(window);
+		}
+		if (direction == 3)
+		{
+			if (collision_cell != 3)
+			{
+				pacman.SetPosition({ 0, velocity });
+			}
+			pacman.ChangeTexture(&texture_pacman_down);
+			pacman.Draw(window);
+		}
+		if (pacman.GetPosition().x >= 26 * 32)
+		{
+			pacman.SetPosition({ -pacman.GetPosition().x-35,0 });
+		}
+		else
+		{
+			if (pacman.GetPosition().x <= -35)
+			{
+				pacman.SetPosition({ 26 * 32 +10,0 });
+			}
+		}
+
+
 		
 		window.display();
 	}

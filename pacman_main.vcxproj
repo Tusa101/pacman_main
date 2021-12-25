@@ -145,15 +145,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="collision.cpp" />
+    <ClCompile Include="entity_new_source.cpp" />
     <ClCompile Include="main_window.cpp" />
     <ClCompile Include="MapConstructor.cpp" />
-    <ClCompile Include="map_chars_source.cpp" />
     <ClCompile Include="pacman_character.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="collision.h" />
-    <ClInclude Include="map_characteristics.h" />
+    <ClInclude Include="entity_new.h" />
     <ClInclude Include="pacman_character.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="pacman_main.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

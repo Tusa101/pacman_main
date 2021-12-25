@@ -1,24 +1,18 @@
 ﻿#pragma once
 #include <SFML/Graphics.hpp>
-#include "map_characteristics.h"
 #include "collision.h"
 
 
 class Pacman
 {
 public:
-	Pacman(const sf::Texture& texture, const float& x, const float& y) : sprite_(texture), coords_({ x,y }) {}
-	Pacman(const Pacman& pacman) :coords_({pacman.GetCoords().GetX(), pacman.GetCoords().GetY()}){}
-	sf::Sprite GetSprite() const { return sprite_; }
-	void SetSprite(const sf::Sprite& sprite) { sprite_ = sprite; }
-
-	void SetEntity(sf::RenderWindow& window);
-	Point GetCoords() const { return coords_; }
-	Pacman& operator+ (const Point& other);
-	Pacman& operator= (const Pacman& pacman);
-
-	Collision GetCollision() { return Collision(sprite_); }
+	Pacman(const sf::Texture* texture, const sf::Vector2f& position);
+	void Draw(sf::RenderWindow& window);
+	sf::Vector2f GetPosition() const { return body_.getPosition(); }
+	Collision GetCollision() { return Collision(body_); }
+	void SetPosition(sf::Vector2f position);
+	void ChangeTexture(const sf::Texture* texture);
 private:
-	sf::Sprite sprite_;
-	Point coords_{};
+	sf::RectangleShape body_;
+	sf::Vector2f position_;
 };

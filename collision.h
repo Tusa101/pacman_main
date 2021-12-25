@@ -5,15 +5,15 @@
 class Collision
 {
 public:
-	Collision(sf::Sprite& body):body_(body){}
+	Collision(sf::RectangleShape& body):body_(body){}
 	~Collision(){}
 
-	void Move(float dx, float dy) { body_.move(dx, dy); }
+	void Move(const float& dx, const float& dy) const { body_.move(dx, dy); }
 
-	bool CheckCollision(Collision& other, float push);
-	sf::Vector2f GetPosition() { return body_.getPosition(); }
-	sf::Vector2f GetHalfSize() { return sf::Vector2f{32,32} / 2.0f; }
+	bool CheckCollision(Collision& other, float push) const;
+	sf::Vector2f GetPosition() const { return body_.getPosition(); }
+	sf::Vector2f GetHalfSize() const { return body_.getSize() / 2.0f; }
 private:
-	sf::Sprite& body_;
+	sf::RectangleShape& body_;
 };
 

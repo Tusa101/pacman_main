@@ -1,21 +1,26 @@
 ﻿#include "pacman_character.h"
-#include "map_characteristics.h"
-void Pacman::SetEntity(sf::RenderWindow& window)
+
+Pacman::Pacman(const sf::Texture* texture, const sf::Vector2f& position):
+position_(position)
 {
-	sprite_.setPosition(coords_.GetX(), coords_.GetY());
-	window.draw(sprite_);
+	body_.setSize({ 32,32 });
+	body_.setTexture(texture);
 }
 
-Pacman& Pacman::operator+(const Point& other)
+void Pacman::Draw(sf::RenderWindow& window)
 {
-	coords_.SetX(coords_.GetX() + other.GetX());
-	coords_.SetY(coords_.GetY() + other.GetY());
-	return *this;
+	body_.setPosition(position_.x, position_.y);
+	window.draw(body_);
 }
 
-Pacman& Pacman::operator=(const Pacman& pacman)
+void Pacman::SetPosition(sf::Vector2f position)
 {
-	coords_.SetX(pacman.GetCoords().GetX());
-	coords_.SetY(pacman.GetCoords().GetY());
-	return *this;
+	position_.x += position.x;
+	position_.y += position.y;
+}
+
+void Pacman::ChangeTexture(const sf::Texture* texture)
+{
+	body_.setSize({ 32,32 });
+	body_.setTexture(texture);
 }

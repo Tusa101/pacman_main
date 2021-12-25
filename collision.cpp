@@ -2,7 +2,7 @@
 #include "collision.h"
 
 
-bool Collision::CheckCollision(Collision& other, float push)
+bool Collision::CheckCollision(Collision& other, float push) const
 {
 	sf::Vector2f other_position = other.GetPosition();
 	sf::Vector2f other_half_size = other.GetHalfSize();
@@ -23,12 +23,12 @@ bool Collision::CheckCollision(Collision& other, float push)
 		{
 			if(delta_x > 0.0f)
 			{
-				Move(intersect_x * (1.0f - push), 0.0f);
+				//Move(intersect_x * (1.0f - push), 0.0f);
 				other.Move(-intersect_x * push, 0.0f);
 			}
 			else
 			{
-				Move(-intersect_x * (1.0f - push), 0.0f);
+				//Move(-intersect_x * (1.0f - push), 0.0f);
 				other.Move(intersect_x * push, 0.0f);
 			}
 		}
@@ -36,12 +36,12 @@ bool Collision::CheckCollision(Collision& other, float push)
 		{
 			if (delta_y > 0.0f)
 			{
-				Move(0.0f, intersect_y * (1.0f - push));
+				//Move(0.0f, intersect_y * (1.0f - push));
 				other.Move(0.0f, -intersect_y * push);
 			}
 			else
 			{
-				Move(0.0f, -intersect_y * (1.0f - push));
+				//Move(0.0f, -intersect_y * (1.0f - push));
 				other.Move(0.0f, intersect_y * push);
 			}
 		}
